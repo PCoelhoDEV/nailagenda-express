@@ -518,13 +518,13 @@
           btn.onclick = () => selecionarData(ano, mes, d);
           btn.className = `h-10 w-full flex flex-col items-center justify-center rounded-xl transition text-xs font-semibold cursor-pointer active:scale-95 relative ${
             ehSelecionado
-              ? 'bg-espresso text-white font-bold shadow-md scale-105 z-10'
+              ? 'bg-roseaccent text-white font-bold shadow-md shadow-rose-300 scale-105 z-10 ring-2 ring-rose-200'
               : 'text-neutral-800 hover:bg-rosesoft hover:text-roseaccent border border-transparent hover:border-roseborder'
           }`;
 
           btn.innerHTML = `
             <span>${d}</span>
-            ${ehHoje ? `<span class="w-1.5 h-1.5 rounded-full ${ehSelecionado ? 'bg-amber-300' : 'bg-roseaccent'} absolute bottom-1"></span>` : ''}
+            ${ehHoje ? `<span class="w-1.5 h-1.5 rounded-full ${ehSelecionado ? 'bg-white' : 'bg-roseaccent'} absolute bottom-1"></span>` : ''}
           `;
         }
 
