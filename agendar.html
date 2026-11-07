@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Agendamento Online • Escolha seu Procedimento</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            linen: '#FBF9F5',
+            sand: '#F5EFE6',
+            ink: '#1C120C',
+            roseaccent: '#E65388',
+            rosesoft: '#FFF1F5',
+            roseborder: '#FAD2E1'
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Fraunces', 'serif']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-linen text-ink min-h-screen pb-20 antialiased">
+
+  <main class="max-w-md mx-auto px-4 pt-6 space-y-6">
+
+    <!-- CABEÇALHO DO SALÃO DA MANICURE -->
+    <div class="bg-white rounded-3xl p-6 border border-neutral-200/90 shadow-sm text-center relative overflow-hidden">
+      <div class="w-16 h-16 mx-auto bg-rosesoft text-roseaccent border-2 border-roseborder rounded-2xl flex items-center justify-center text-3xl mb-3 shadow-inner">
+        💅
+      </div>
+      <h1 id="viewStudioName" class="font-serif text-2xl font-bold text-ink">Studio Carla Nails</h1>
+      <p id="viewStudioCity" class="text-xs text-neutral-500 mt-1">Atendimento com Hora Marcada</p>
+      
+      <div class="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-center gap-2 text-xs text-emerald-700 font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Agenda Aberta para Novos Atendimentos
+      </div>
+    </div>
+
+    <!-- PASSO 1: ESCOLHA O SERVIÇO -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <h2 class="font-serif text-base font-bold text-ink flex items-center gap-2">
+          <span>1.</span> Escolha o Procedimento
+        </h2>
+        <span class="text-[11px] text-neutral-400">Clique para selecionar</span>
+      </div>
+
+      <div id="serviceList" class="space-y-2.5">
+        <!-- Serviços serão renderizados aqui dinamicamente -->
+      </div>
+    </div>
+
+    <!-- PASSO 2: SELECIONE O DIA E HORÁRIO PREFERIDO -->
+    <div class="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm space-y-4">
+      <h2 class="font-serif text-base font-bold text-ink flex items-center gap-2">
+        <span>2.</span> Quando você prefere ser atendida?
+      </h2>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Dia da Semana</label>
+          <select id="selectedDay" class="w-full text-xs p-2.5 bg-linen rounded-xl border border-neutral-200 font-medium text-neutral-800 focus:outline-none">
+            <option>Hoje</option>
+            <option>Amanhã</option>
+            <option>Segunda-feira</option>
+            <option>Terça-feira</option>
+            <option>Quarta-feira</option>
+            <option>Quinta-feira</option>
+            <option>Sexta-feira</option>
+            <option>Sábado</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Horário de Preferência</label>
+          <select id="selectedTime" class="w-full text-xs p-2.5 bg-linen rounded-xl border border-neutral-200 font-medium text-neutral-800 focus:outline-none">
+            <option>09:00</option>
+            <option>10:30</option>
+            <option>13:30</option>
+            <option>15:00</option>
+            <option>16:30</option>
+            <option>18:00</option>
+            <option>19:30</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Seu Nome Completo</label>
+        <input id="clientName" type="text" placeholder="Como podemos te chamar?" class="w-full text-xs p-3 bg-linen rounded-xl border border-neutral-200 focus:outline-none">
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Observações (opcional)</label>
+        <input id="clientObs" type="text" placeholder="Ex: Preciso de remoção de outro espaço, unha roída, etc." class="w-full text-xs p-3 bg-linen rounded-xl border border-neutral-200 focus:outline-none">
+      </div>
+    </div>
+
+    <!-- BOTÃO FINAL: AGENDAR DIRETO NO WHATSAPP -->
+    <div class="pt-2">
+      <button onclick="enviarAgendamentoWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition active:scale-95 text-sm sm:text-base cursor-pointer">
+        <span>📲 Solicitar Agendamento no WhatsApp</span>
+      </button>
+      <p class="text-center text-[11px] text-neutral-400 mt-2">
+        Você será direcionada para o WhatsApp oficial para confirmação do horário.
+      </p>
+    </div>
+
+  </main>
+
+  <script>
+    // Recupera dados passados na URL via Base64 (#p=...)
+    let studioData = {
+      name: "Studio Carla Nails",
+      phone: "5511982288897",
+      city: "Atendimento com Hora Marcada",
+      services: [
+        { name: "Fibra de Vidro Slim", price: "120,00", time: "2h" },
+        { name: "Gel na Tip Clássico", price: "90,00", time: "1h30" },
+        { name: "Molde F1 Dual Form", price: "100,00", time: "1h30" },
+        { name: "Manutenção de Fibra", price: "70,00", time: "1h15" },
+        { name: "Esmaltação em Gel", price: "50,00", time: "45m" }
+      ]
+    };
+
+    try {
+      const hash = window.location.hash;
+      if (hash && hash.includes('#p=')) {
+        const b64 = hash.replace('#p=', '');
+        const jsonStr = decodeURIComponent(escape(atob(b64)));
+        studioData = JSON.parse(jsonStr);
+      }
+    } catch (e) {
+      console.log('Usando dados padrão', e);
+    }
+
+    // Renderiza dados do salão
+    document.getElementById('viewStudioName').innerText = studioData.name || "Studio de Beleza";
+    document.getElementById('viewStudioCity').innerText = studioData.city || "Atendimento com Hora Marcada";
+
+    let selectedServiceIndex = 0;
+
+    function renderizarServicos() {
+      const container = document.getElementById('serviceList');
+      container.innerHTML = '';
+
+      studioData.services.forEach((s, idx) => {
+        const isSelected = idx === selectedServiceIndex;
+        const div = document.createElement('div');
+        div.className = `p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
+          isSelected 
+            ? 'bg-rosesoft/80 border-roseaccent shadow-sm' 
+            : 'bg-white border-neutral-200/90 hover:border-neutral-300'
+        }`;
+        div.onclick = () => {
+          selectedServiceIndex = idx;
+          renderizarServicos();
+        };
+
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              isSelected ? 'border-roseaccent bg-roseaccent' : 'border-neutral-300'
+            }">
+              ${isSelected ? '<span class="w-2 h-2 rounded-full bg-white"></span>' : ''}
+            </div>
+            <div>
+              <div class="font-serif font-bold text-sm text-ink">${s.name}</div>
+              <div class="text-[11px] text-neutral-400">Duração média: ${s.time}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-neutral-400 font-medium">R$</span>
+            <span class="font-serif font-bold text-base text-ink">${s.price}</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function enviarAgendamentoWhatsApp() {
+      const servico = studioData.services[selectedServiceIndex];
+      const dia = document.getElementById('selectedDay').value;
+      const horario = document.getElementById('selectedTime').value;
+      const nome = document.getElementById('clientName').value.trim() || 'Cliente';
+      const obs = (document.getElementById('clientObs')?.value || '').trim();
+
+      const phone = (studioData.phone || '').replace(/\D/g, '');
+      const cleanPhone = phone.startsWith('55') ? phone : `55${phone}`;
+
+      let texto = `Olá *${studioData.name}*! 👋%0A%0AGostaria de solicitar um agendamento:%0A%0A💅 *Procedimento:* ${servico.name} (R$ ${servico.price})%0A📅 *Previsão:* ${dia} às ${horario}%0A👤 *Meu Nome:* ${nome}`;
+      if (obs) {
+        texto += `%0A📝 *Observação:* ${encodeURIComponent(obs)}`;
+      }
+      texto += `%0A%0AVocê tem esse horário disponível na agenda?`;
+
+      const zapUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${texto}`;
+      window.location.href = zapUrl;
+    }
+
+    renderizarServicos();
+  </script>
+</body>
+</html>
