@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Agendamento Online • Escolha seu Procedimento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Agendamento Online • Escolha seus Procedimentos</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,188 +30,516 @@
       }
     }
   </script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #FBF9F5;
+      color: #1C120C;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .service-card {
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .service-card:active {
+      transform: scale(0.98);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .fade-step {
+      animation: fadeIn 0.22s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body class="bg-linen text-ink min-h-screen pb-20 antialiased">
+<body class="min-h-screen pb-28 antialiased flex flex-col justify-between">
 
-  <main class="max-w-md mx-auto px-4 pt-6 space-y-6">
-
-    <!-- CABEÇALHO DO SALÃO DA MANICURE -->
-    <div class="bg-white rounded-3xl p-6 border border-neutral-200/90 shadow-sm text-center relative overflow-hidden">
-      <div class="w-16 h-16 mx-auto bg-rosesoft text-roseaccent border-2 border-roseborder rounded-2xl flex items-center justify-center text-3xl mb-3 shadow-inner">
-        💅
-      </div>
-      <h1 id="viewStudioName" class="font-serif text-2xl font-bold text-ink">Studio Carla Nails</h1>
-      <p id="viewStudioCity" class="text-xs text-neutral-500 mt-1">Atendimento com Hora Marcada</p>
+  <!-- CABEÇALHO COMPACTO E ELEGANTE (SEM EMOJI GIGANTE) -->
+  <header class="bg-white border-b border-neutral-200/90 sticky top-0 z-30 shadow-xs px-4 py-3">
+    <div class="max-w-md mx-auto flex items-center justify-between">
       
-      <div class="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-center gap-2 text-xs text-emerald-700 font-semibold">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Agenda Aberta para Novos Atendimentos
+      <!-- Informações do Estúdio -->
+      <div class="text-left">
+        <h1 id="viewStudioName" class="font-serif font-bold text-base sm:text-lg text-ink leading-tight">
+          Studio Carla Nails
+        </h1>
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="viewStudioCity" class="text-[11px] text-neutral-500 font-medium">
+            Atendimento com Hora Marcada
+          </span>
+        </div>
       </div>
-    </div>
 
-    <!-- PASSO 1: ESCOLHA O SERVIÇO -->
-    <div class="space-y-3">
-      <div class="flex items-center justify-between px-1">
-        <h2 class="font-serif text-base font-bold text-ink flex items-center gap-2">
-          <span>1.</span> Escolha o Procedimento
+      <!-- Indicador de Etapa -->
+      <div class="text-right">
+        <span id="stepBadge" class="text-[10px] font-bold uppercase tracking-wider bg-rosesoft text-roseaccent border border-roseborder px-2.5 py-1 rounded-full">
+          Etapa 1 de 2
+        </span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- ETAPA 1: ESCOLHA DOS PROCEDIMENTOS (MULTI-SELEÇÃO INTUITIVA) -->
+  <!-- ============================================================== -->
+  <main id="step1Container" class="max-w-md mx-auto px-4 pt-4 pb-6 w-full fade-step space-y-3">
+    
+    <div class="flex items-center justify-between px-1">
+      <div>
+        <h2 class="font-serif font-bold text-base text-ink">
+          Escolha os procedimentos
         </h2>
-        <span class="text-[11px] text-neutral-400">Clique para selecionar</span>
+        <p class="text-xs text-neutral-500">
+          Você pode selecionar um ou mais serviços:
+        </p>
       </div>
-
-      <div id="serviceList" class="space-y-2.5">
-        <!-- Serviços serão renderizados aqui dinamicamente -->
-      </div>
+      <span id="selectedCountBadge" class="text-[11px] font-semibold text-roseaccent bg-rosesoft px-2 py-0.5 rounded-full">
+        0 selecionados
+      </span>
     </div>
 
-    <!-- PASSO 2: SELECIONE O DIA E HORÁRIO PREFERIDO -->
-    <div class="bg-white rounded-2xl p-5 border border-neutral-200 shadow-sm space-y-4">
-      <h2 class="font-serif text-base font-bold text-ink flex items-center gap-2">
-        <span>2.</span> Quando você prefere ser atendida?
-      </h2>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Dia da Semana</label>
-          <select id="selectedDay" class="w-full text-xs p-2.5 bg-linen rounded-xl border border-neutral-200 font-medium text-neutral-800 focus:outline-none">
-            <option>Hoje</option>
-            <option>Amanhã</option>
-            <option>Segunda-feira</option>
-            <option>Terça-feira</option>
-            <option>Quarta-feira</option>
-            <option>Quinta-feira</option>
-            <option>Sexta-feira</option>
-            <option>Sábado</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Horário de Preferência</label>
-          <select id="selectedTime" class="w-full text-xs p-2.5 bg-linen rounded-xl border border-neutral-200 font-medium text-neutral-800 focus:outline-none">
-            <option>09:00</option>
-            <option>10:30</option>
-            <option>13:30</option>
-            <option>15:00</option>
-            <option>16:30</option>
-            <option>18:00</option>
-            <option>19:30</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Seu Nome Completo</label>
-        <input id="clientName" type="text" placeholder="Como podemos te chamar?" class="w-full text-xs p-3 bg-linen rounded-xl border border-neutral-200 focus:outline-none">
-      </div>
-
-      <div>
-        <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Observações (opcional)</label>
-        <input id="clientObs" type="text" placeholder="Ex: Preciso de remoção de outro espaço, unha roída, etc." class="w-full text-xs p-3 bg-linen rounded-xl border border-neutral-200 focus:outline-none">
-      </div>
+    <!-- Lista de Serviços Dinâmica -->
+    <div id="serviceList" class="space-y-2 pt-1">
+      <!-- Injetado dinamicamente via JS -->
     </div>
 
-    <!-- BOTÃO FINAL: AGENDAR DIRETO NO WHATSAPP -->
-    <div class="pt-2">
-      <button onclick="enviarAgendamentoWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition active:scale-95 text-sm sm:text-base cursor-pointer">
-        <span>📲 Solicitar Agendamento no WhatsApp</span>
+  </main>
+
+  <!-- BARRA INFERIOR FIXA DA ETAPA 1 -->
+  <div id="bottomBarStep1" class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-neutral-200 p-4 z-40 shadow-lg">
+    <div class="max-w-md mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Totalizador em Tempo Real -->
+      <div class="text-left">
+        <div class="text-[10px] uppercase font-bold text-neutral-400">Total Estimado</div>
+        <div class="flex items-baseline gap-1">
+          <span class="text-xs font-bold text-ink">R$</span>
+          <span id="totalValueDisplay" class="font-serif font-bold text-xl text-ink">0,00</span>
+        </div>
+        <div id="totalTimeDisplay" class="text-[10px] text-neutral-500 font-medium">0 min</div>
+      </div>
+
+      <!-- Botão Avançar -->
+      <button id="btnAvancar" onclick="irParaEtapa2()" disabled class="flex-1 bg-emerald-600 disabled:bg-neutral-300 disabled:cursor-not-allowed hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-md">
+        <span>Avançar para Horário</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5l7 7-7 7"/></svg>
       </button>
-      <p class="text-center text-[11px] text-neutral-400 mt-2">
-        Você será direcionada para o WhatsApp oficial para confirmação do horário.
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- ETAPA 2: CALENDÁRIO VISUAL + HORÁRIOS + DADOS DA CLIENTE -->
+  <!-- ============================================================== -->
+  <main id="step2Container" class="max-w-md mx-auto px-4 pt-3 pb-8 w-full hidden fade-step space-y-4">
+    
+    <!-- Botão Voltar -->
+    <button onclick="voltarParaEtapa1()" class="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-500 hover:text-neutral-800 transition py-1">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 19l-7-7 7-7"/></svg>
+      <span>Voltar para Procedimentos</span>
+    </button>
+
+    <!-- Resumo dos Serviços Selecionados -->
+    <div class="bg-white rounded-2xl p-3.5 border border-neutral-200 shadow-xs space-y-2">
+      <div class="flex items-center justify-between text-xs">
+        <span class="font-bold text-ink uppercase tracking-wider text-[10px]">Serviços Escolhidos:</span>
+        <span id="step2TotalText" class="font-serif font-bold text-roseaccent text-sm">R$ 0,00</span>
+      </div>
+      <div id="step2SelectedList" class="space-y-1 text-xs text-neutral-600">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </div>
+
+    <!-- 1. CALENDÁRIO VISUAL DOS PRÓXIMOS DIAS -->
+    <div class="space-y-2">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="font-serif font-bold text-sm text-ink flex items-center gap-1.5">
+          <span>📅</span> Escolha o Dia
+        </h3>
+        <span id="selectedDayLabel" class="text-[11px] font-semibold text-roseaccent">Hoje</span>
+      </div>
+
+      <!-- Carrossel Horizontal de Dias -->
+      <div id="calendarTrack" class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
+        <!-- Injetado dinamicamente via JS -->
+      </div>
+    </div>
+
+    <!-- 2. SELETOR VISUAL DE HORÁRIOS DISPONÍVEIS -->
+    <div class="space-y-2">
+      <div class="flex items-center justify-between px-1">
+        <h3 class="font-serif font-bold text-sm text-ink flex items-center gap-1.5">
+          <span>⏰</span> Horário Preferido
+        </h3>
+        <span id="selectedTimeLabel" class="text-[11px] font-semibold text-roseaccent">09:00</span>
+      </div>
+
+      <!-- Grid de Horários em Chips -->
+      <div id="timeChipsGrid" class="grid grid-cols-4 gap-2">
+        <!-- Chips gerados dinamicamente via JS -->
+      </div>
+    </div>
+
+    <!-- 3. IDENTIFICAÇÃO DA CLIENTE -->
+    <div class="bg-white rounded-2xl p-4 border border-neutral-200 shadow-xs space-y-3">
+      <h3 class="font-serif font-bold text-sm text-ink flex items-center gap-1.5">
+        <span>👤</span> Seus Dados para Contato
+      </h3>
+
+      <div>
+        <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Seu Nome Completo *</label>
+        <input id="clientNameInput" type="text" placeholder="Ex: Juliana Santos" class="w-full text-xs p-3 bg-linen rounded-xl border border-neutral-200 focus:outline-none focus:border-roseaccent font-medium">
+      </div>
+
+      <div>
+        <label class="block text-[11px] font-semibold text-neutral-600 mb-1">Alguma observação? (opcional)</label>
+        <input id="clientObsInput" type="text" placeholder="Ex: Tenho que remover alongamento anterior, unha roída..." class="w-full text-xs p-3 bg-linen rounded-xl border border-neutral-200 focus:outline-none focus:border-roseaccent">
+      </div>
+    </div>
+
+    <!-- BOTÃO FINAL: DISPARAR WHATSAPP -->
+    <div class="pt-2">
+      <button onclick="finalizarAgendamentoWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2 transition active:scale-95 shadow-lg cursor-pointer">
+        <span>Confirmar no WhatsApp 📲</span>
+      </button>
+      <p class="text-center text-[10px] text-neutral-400 mt-2">
+        Você será direcionada para o WhatsApp oficial com seu pedido já montado.
       </p>
     </div>
 
   </main>
 
   <script>
-    // Recupera dados passados na URL via Base64 (#p=...)
-    let studioData = {
+    // ==============================================================
+    // RECUPERAÇÃO DE DADOS VIA HASH BASE64 (#p=...)
+    // ==============================================================
+    const defaultData = {
       name: "Studio Carla Nails",
       phone: "5511982288897",
       city: "Atendimento com Hora Marcada",
       services: [
         { name: "Fibra de Vidro Slim", price: "120,00", time: "2h" },
-        { name: "Gel na Tip Clássico", price: "90,00", time: "1h30" },
         { name: "Molde F1 Dual Form", price: "100,00", time: "1h30" },
+        { name: "Gel na Tip Clássico", price: "90,00", time: "1h30" },
         { name: "Manutenção de Fibra", price: "70,00", time: "1h15" },
-        { name: "Esmaltação em Gel", price: "50,00", time: "45m" }
+        { name: "Esmaltação em Gel", price: "50,00", time: "45m" },
+        { name: "Cutilagem Russa", price: "40,00", time: "35m" }
       ]
     };
+
+    let studioData = defaultData;
 
     try {
       const hash = window.location.hash;
       if (hash && hash.includes('#p=')) {
         const b64 = hash.replace('#p=', '');
         const jsonStr = decodeURIComponent(escape(atob(b64)));
-        studioData = JSON.parse(jsonStr);
+        const parsed = JSON.parse(jsonStr);
+        if (parsed && parsed.services && parsed.services.length > 0) {
+          studioData = parsed;
+        }
       }
     } catch (e) {
-      console.log('Usando dados padrão', e);
+      console.log('Usando perfil padrão', e);
     }
 
-    // Renderiza dados do salão
+    // Aplica informações do estúdio no topo
     document.getElementById('viewStudioName').innerText = studioData.name || "Studio de Beleza";
     document.getElementById('viewStudioCity').innerText = studioData.city || "Atendimento com Hora Marcada";
 
-    let selectedServiceIndex = 0;
+    // Estado da seleção de serviços (índices selecionados: Set)
+    const selectedServiceIndices = new Set();
+
+    // ==============================================================
+    // RENDERIZAÇÃO DA ETAPA 1 (LISTA DE PROCEDIMENTOS)
+    // ==============================================================
+    function parsePreco(str) {
+      if (!str) return 0;
+      const clean = str.replace(/[^\d,\.]/g, '').replace('.', '').replace(',', '.');
+      return parseFloat(clean) || 0;
+    }
 
     function renderizarServicos() {
       const container = document.getElementById('serviceList');
       container.innerHTML = '';
 
       studioData.services.forEach((s, idx) => {
-        const isSelected = idx === selectedServiceIndex;
-        const div = document.createElement('div');
-        div.className = `p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
+        const isSelected = selectedServiceIndices.has(idx);
+
+        const card = document.createElement('div');
+        card.className = `service-card p-3.5 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
           isSelected 
-            ? 'bg-rosesoft/80 border-roseaccent shadow-sm' 
+            ? 'bg-rosesoft border-roseaccent shadow-xs' 
             : 'bg-white border-neutral-200/90 hover:border-neutral-300'
         }`;
-        div.onclick = () => {
-          selectedServiceIndex = idx;
-          renderizarServicos();
-        };
+        card.onclick = () => alternarServico(idx);
 
-        div.innerHTML = `
+        card.innerHTML = `
           <div class="flex items-center gap-3">
-            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-              isSelected ? 'border-roseaccent bg-roseaccent' : 'border-neutral-300'
+            <div class="w-5 h-5 rounded-lg border-2 flex items-center justify-center transition ${
+              isSelected ? 'border-roseaccent bg-roseaccent' : 'border-neutral-300 bg-white'
             }">
-              ${isSelected ? '<span class="w-2 h-2 rounded-full bg-white"></span>' : ''}
+              ${isSelected ? '<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
             </div>
-            <div>
-              <div class="font-serif font-bold text-sm text-ink">${s.name}</div>
-              <div class="text-[11px] text-neutral-400">Duração média: ${s.time}</div>
+            <div class="text-left">
+              <div class="font-bold text-xs sm:text-sm text-ink leading-snug">${s.name}</div>
+              <div class="text-[11px] text-neutral-400 mt-0.5">Duração média: ${s.time || '1h'}</div>
             </div>
           </div>
+
           <div class="text-right">
             <span class="text-xs text-neutral-400 font-medium">R$</span>
-            <span class="font-serif font-bold text-base text-ink">${s.price}</span>
+            <span class="font-serif font-bold text-sm sm:text-base text-ink">${s.price}</span>
           </div>
         `;
-        container.appendChild(div);
+
+        container.appendChild(card);
+      });
+
+      atualizarTotalizador();
+    }
+
+    function alternarServico(idx) {
+      if (selectedServiceIndices.has(idx)) {
+        selectedServiceIndices.delete(idx);
+      } else {
+        selectedServiceIndices.add(idx);
+      }
+      renderizarServicos();
+    }
+
+    function atualizarTotalizador() {
+      let total = 0;
+      let count = selectedServiceIndices.size;
+
+      selectedServiceIndices.forEach(idx => {
+        total += parsePreco(studioData.services[idx].price);
+      });
+
+      const totalFormatado = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('totalValueDisplay').innerText = totalFormatado;
+      document.getElementById('selectedCountBadge').innerText = `${count} selecionado${count === 1 ? '' : 's'}`;
+      document.getElementById('totalTimeDisplay').innerText = `${count} procedimento${count === 1 ? '' : 's'}`;
+
+      const btn = document.getElementById('btnAvancar');
+      if (count > 0) {
+        btn.removeAttribute('disabled');
+      } else {
+        btn.setAttribute('disabled', 'true');
+      }
+    }
+
+    // ==============================================================
+    // TRANSIÇÃO DE ETAPAS
+    // ==============================================================
+    function irParaEtapa2() {
+      if (selectedServiceIndices.size === 0) return;
+
+      document.getElementById('step1Container').classList.add('hidden');
+      document.getElementById('bottomBarStep1').classList.add('hidden');
+      document.getElementById('step2Container').classList.remove('hidden');
+      document.getElementById('stepBadge').innerText = "Etapa 2 de 2";
+      window.scrollTo(0, 0);
+
+      // Renderiza resumo da seleção
+      const summaryList = document.getElementById('step2SelectedList');
+      summaryList.innerHTML = '';
+      let total = 0;
+
+      selectedServiceIndices.forEach(idx => {
+        const s = studioData.services[idx];
+        total += parsePreco(s.price);
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between text-xs text-neutral-700';
+        row.innerHTML = `
+          <span>• ${s.name}</span>
+          <span class="font-medium text-ink">R$ ${s.price}</span>
+        `;
+        summaryList.appendChild(row);
+      });
+
+      document.getElementById('step2TotalText').innerText = `Total: R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      renderizarCalendario();
+      renderizarHorarios();
+    }
+
+    function voltarParaEtapa1() {
+      document.getElementById('step2Container').classList.add('hidden');
+      document.getElementById('step1Container').classList.remove('hidden');
+      document.getElementById('bottomBarStep1').classList.remove('hidden');
+      document.getElementById('stepBadge').innerText = "Etapa 1 de 2";
+      window.scrollTo(0, 0);
+    }
+
+    // ==============================================================
+    // ETAPA 2: CALENDÁRIO INTERATIVO & HORÁRIOS
+    // ==============================================================
+    let diaSelecionado = "Hoje";
+    let horarioSelecionado = "09:00";
+
+    const horariosDisponiveis = [
+      "09:00", "10:30", "13:30", "15:00",
+      "16:30", "18:00", "19:30", "20:30"
+    ];
+
+    function gerarProximosDias() {
+      const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const hoje = new Date();
+      const dias = [];
+
+      for (let i = 0; i < 10; i++) {
+        const d = new Date();
+        d.setDate(hoje.getDate() + i);
+
+        const dSemana = diasSemana[d.getDay()];
+        const dMes = d.getDate();
+        const mesNome = meses[d.getMonth()];
+
+        let rotuloCurto = `${dSemana}, ${dMes}`;
+        let rotuloCompleto = `${dSemana}, ${dMes} de ${mesNome}`;
+
+        if (i === 0) {
+          rotuloCurto = "Hoje";
+          rotuloCompleto = `Hoje (${dSemana}, ${dMes}/${mesNome})`;
+        } else if (i === 1) {
+          rotuloCurto = "Amanhã";
+          rotuloCompleto = `Amanhã (${dSemana}, ${dMes}/${mesNome})`;
+        }
+
+        dias.push({
+          dSemana,
+          dMes,
+          mesNome,
+          rotuloCurto,
+          rotuloCompleto
+        });
+      }
+      return dias;
+    }
+
+    function renderizarCalendario() {
+      const track = document.getElementById('calendarTrack');
+      track.innerHTML = '';
+      const dias = gerarProximosDias();
+
+      dias.forEach((d, idx) => {
+        const isSelected = (diaSelecionado === d.rotuloCompleto) || (idx === 0 && diaSelecionado === "Hoje");
+        if (idx === 0 && diaSelecionado === "Hoje") {
+          diaSelecionado = d.rotuloCompleto;
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => {
+          diaSelecionado = d.rotuloCompleto;
+          document.getElementById('selectedDayLabel').innerText = d.rotuloCurto;
+          renderizarCalendario();
+        };
+
+        btn.className = `flex-shrink-0 flex flex-col items-center justify-center w-16 py-2.5 rounded-2xl border transition active:scale-95 ${
+          isSelected 
+            ? 'bg-espresso text-white border-espresso shadow-md' 
+            : 'bg-white text-neutral-700 border-neutral-200/90 hover:border-neutral-300'
+        }`;
+
+        btn.innerHTML = `
+          <span class="text-[10px] uppercase font-bold ${isSelected ? 'text-neutral-300' : 'text-neutral-400'}">${d.dSemana}</span>
+          <span class="font-serif font-bold text-base my-0.5">${d.dMes}</span>
+          <span class="text-[9px] font-semibold ${isSelected ? 'text-amber-300' : 'text-neutral-500'}">${d.rotuloCurto === 'Hoje' ? 'Hoje' : d.mesNome}</span>
+        `;
+
+        track.appendChild(btn);
+      });
+
+      document.getElementById('selectedDayLabel').innerText = diaSelecionado;
+    }
+
+    function renderizarHorarios() {
+      const grid = document.getElementById('timeChipsGrid');
+      grid.innerHTML = '';
+
+      horariosDisponiveis.forEach(hora => {
+        const isSelected = hora === horarioSelecionado;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => {
+          horarioSelecionado = hora;
+          document.getElementById('selectedTimeLabel').innerText = hora;
+          renderizarHorarios();
+        };
+
+        btn.className = `py-2.5 px-2 rounded-xl text-xs font-bold border transition text-center active:scale-95 ${
+          isSelected
+            ? 'bg-roseaccent text-white border-roseaccent shadow-xs'
+            : 'bg-white text-neutral-700 border-neutral-200/90 hover:border-neutral-300'
+        }`;
+        btn.innerText = hora;
+
+        grid.appendChild(btn);
       });
     }
 
-    function enviarAgendamentoWhatsApp() {
-      const servico = studioData.services[selectedServiceIndex];
-      const dia = document.getElementById('selectedDay').value;
-      const horario = document.getElementById('selectedTime').value;
-      const nome = document.getElementById('clientName').value.trim() || 'Cliente';
-      const obs = (document.getElementById('clientObs')?.value || '').trim();
+    // ==============================================================
+    // AÇÃO FINAL: ENVIO DIRETO PARA O WHATSAPP
+    // ==============================================================
+    function finalizarAgendamentoWhatsApp() {
+      if (selectedServiceIndices.size === 0) {
+        alert("Por favor, selecione ao menos um procedimento.");
+        return;
+      }
+
+      const nomeCliente = document.getElementById('clientNameInput').value.trim() || 'Cliente';
+      const obs = (document.getElementById('clientObsInput')?.value || '').trim();
+
+      // Monta lista de serviços e total
+      let listaTexto = '';
+      let total = 0;
+
+      selectedServiceIndices.forEach(idx => {
+        const s = studioData.services[idx];
+        listaTexto += `• ${s.name} (R$ ${s.price})%0A`;
+        total += parsePreco(s.price);
+      });
+
+      const totalFormatado = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
       const phone = (studioData.phone || '').replace(/\D/g, '');
       const cleanPhone = phone.startsWith('55') ? phone : `55${phone}`;
 
-      let texto = `Olá *${studioData.name}*! 👋%0A%0AGostaria de solicitar um agendamento:%0A%0A💅 *Procedimento:* ${servico.name} (R$ ${servico.price})%0A📅 *Previsão:* ${dia} às ${horario}%0A👤 *Meu Nome:* ${nome}`;
-      if (obs) {
-        texto += `%0A📝 *Observação:* ${encodeURIComponent(obs)}`;
-      }
-      texto += `%0A%0AVocê tem esse horário disponível na agenda?`;
+      let msg = `Olá *${studioData.name}*! 👋%0A%0AGostaria de solicitar um agendamento:%0A%0A💅 *Procedimento(s):*%0A${listaTexto}%0A💰 *Total:* R$ ${totalFormatado}%0A📅 *Data:* ${diaSelecionado} às ${horarioSelecionado}%0A👤 *Meu Nome:* ${nomeCliente}`;
 
-      const zapUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${texto}`;
+      if (obs) {
+        msg += `%0A📝 *Observação:* ${encodeURIComponent(obs)}`;
+      }
+
+      msg += `%0A%0AVocê tem esse horário disponível na agenda?`;
+
+      const zapUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${msg}`;
       window.location.href = zapUrl;
     }
 
+    // Inicialização
     renderizarServicos();
   </script>
+
 </body>
 </html>
