@@ -165,19 +165,52 @@
       </div>
     </div>
 
-    <!-- 1. CALENDÁRIO VISUAL DOS PRÓXIMOS DIAS -->
-    <div class="space-y-2">
-      <div class="flex items-center justify-between px-1">
+    <!-- 1. CALENDÁRIO VISUAL COMPLETO (FORMATO DE CALENDÁRIO REAL) -->
+    <div class="bg-white rounded-2xl p-4 border border-neutral-200 shadow-xs space-y-3">
+      
+      <!-- Cabeçalho do Mês com Setas de Navegação -->
+      <div class="flex items-center justify-between">
         <h3 class="font-serif font-bold text-sm text-ink flex items-center gap-1.5">
-          <span>📅</span> Escolha o Dia
+          <span>📅</span> Escolha a Data
         </h3>
-        <span id="selectedDayLabel" class="text-[11px] font-semibold text-roseaccent">Hoje</span>
+
+        <div class="flex items-center gap-1">
+          <button id="btnPrevMonth" type="button" onclick="mudarMes(-1)" class="w-7 h-7 flex items-center justify-center rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          
+          <span id="calendarMonthTitle" class="font-bold text-xs text-ink px-2 min-w-[120px] text-center">
+            Novembro 2026
+          </span>
+
+          <button id="btnNextMonth" type="button" onclick="mudarMes(1)" class="w-7 h-7 flex items-center justify-center rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-100">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
       </div>
 
-      <!-- Carrossel Horizontal de Dias -->
-      <div id="calendarTrack" class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
-        <!-- Injetado dinamicamente via JS -->
+      <!-- Dias da Semana (D S T Q Q S S) -->
+      <div class="grid grid-cols-7 gap-1 text-center border-b border-neutral-100 pb-2">
+        <span class="text-[10px] font-bold text-roseaccent uppercase">Dom</span>
+        <span class="text-[10px] font-bold text-neutral-400 uppercase">Seg</span>
+        <span class="text-[10px] font-bold text-neutral-400 uppercase">Ter</span>
+        <span class="text-[10px] font-bold text-neutral-400 uppercase">Qua</span>
+        <span class="text-[10px] font-bold text-neutral-400 uppercase">Qui</span>
+        <span class="text-[10px] font-bold text-neutral-400 uppercase">Sex</span>
+        <span class="text-[10px] font-bold text-neutral-400 uppercase">Sáb</span>
       </div>
+
+      <!-- Grade de Dias do Mês (Todos os Dias) -->
+      <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1 text-center">
+        <!-- Renderizado dinamicamente via JS -->
+      </div>
+
+      <!-- Data Selecionada em Destaque -->
+      <div class="pt-2 border-t border-neutral-100 flex items-center justify-between text-xs">
+        <span class="text-[11px] text-neutral-400 font-medium">Dia escolhido:</span>
+        <span id="selectedDayLabel" class="font-bold text-roseaccent font-serif">Hoje</span>
+      </div>
+
     </div>
 
     <!-- 2. SELETOR VISUAL DE HORÁRIOS DISPONÍVEIS -->
@@ -389,9 +422,26 @@
     }
 
     // ==============================================================
-    // ETAPA 2: CALENDÁRIO INTERATIVO & HORÁRIOS
+    // ETAPA 2: CALENDÁRIO VISUAL COMPLETO DO MÊS & HORÁRIOS
     // ==============================================================
-    let diaSelecionado = "Hoje";
+    const mesesNomes = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    const diasSemanaNomes = [
+      'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira',
+      'Quinta-feira', 'Sexta-feira', 'Sábado'
+    ];
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    let dataSelecionada = new Date();
+    dataSelecionada.setHours(0, 0, 0, 0);
+
+    let mesVisualizacao = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+    let diaSelecionadoTexto = "Hoje";
     let horarioSelecionado = "09:00";
 
     const horariosDisponiveis = [
@@ -399,77 +449,100 @@
       "16:30", "18:00", "19:30", "20:30"
     ];
 
-    function gerarProximosDias() {
-      const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      const hoje = new Date();
-      const dias = [];
+    function mudarMes(delta) {
+      const novoMes = new Date(mesVisualizacao.getFullYear(), mesVisualizacao.getMonth() + delta, 1);
+      
+      // Não permite voltar para meses anteriores ao mês atual
+      const mesMinimo = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      if (novoMes < mesMinimo) return;
 
-      for (let i = 0; i < 10; i++) {
-        const d = new Date();
-        d.setDate(hoje.getDate() + i);
+      mesVisualizacao = novoMes;
+      renderizarCalendario();
+    }
 
-        const dSemana = diasSemana[d.getDay()];
-        const dMes = d.getDate();
-        const mesNome = meses[d.getMonth()];
-
-        let rotuloCurto = `${dSemana}, ${dMes}`;
-        let rotuloCompleto = `${dSemana}, ${dMes} de ${mesNome}`;
-
-        if (i === 0) {
-          rotuloCurto = "Hoje";
-          rotuloCompleto = `Hoje (${dSemana}, ${dMes}/${mesNome})`;
-        } else if (i === 1) {
-          rotuloCurto = "Amanhã";
-          rotuloCompleto = `Amanhã (${dSemana}, ${dMes}/${mesNome})`;
-        }
-
-        dias.push({
-          dSemana,
-          dMes,
-          mesNome,
-          rotuloCurto,
-          rotuloCompleto
-        });
-      }
-      return dias;
+    function selecionarData(ano, mes, dia) {
+      dataSelecionada = new Date(ano, mes, dia);
+      dataSelecionada.setHours(0, 0, 0, 0);
+      renderizarCalendario();
     }
 
     function renderizarCalendario() {
-      const track = document.getElementById('calendarTrack');
-      track.innerHTML = '';
-      const dias = gerarProximosDias();
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
 
-      dias.forEach((d, idx) => {
-        const isSelected = (diaSelecionado === d.rotuloCompleto) || (idx === 0 && diaSelecionado === "Hoje");
-        if (idx === 0 && diaSelecionado === "Hoje") {
-          diaSelecionado = d.rotuloCompleto;
-        }
+      const ano = mesVisualizacao.getFullYear();
+      const mes = mesVisualizacao.getMonth();
+
+      // Atualiza o título do cabeçalho
+      document.getElementById('calendarMonthTitle').innerText = `${mesesNomes[mes]} ${ano}`;
+
+      // Desabilita botão do mês anterior se estiver no mês atual
+      const mesMinimo = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      const btnPrev = document.getElementById('btnPrevMonth');
+      if (mesVisualizacao <= mesMinimo) {
+        btnPrev.setAttribute('disabled', 'true');
+      } else {
+        btnPrev.removeAttribute('disabled');
+      }
+
+      // Primeiro dia da semana do mês (0 = Domingo, 1 = Segunda, etc.)
+      const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+      
+      // Total de dias no mês
+      const totalDiasMes = new Date(ano, mes + 1, 0).getDate();
+
+      // Células vazias antes do primeiro dia
+      for (let i = 0; i < primeiroDiaSemana; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'h-10 w-full';
+        grid.appendChild(blank);
+      }
+
+      // Preenche todos os dias do mês
+      for (let d = 1; d <= totalDiasMes; d++) {
+        const dataDia = new Date(ano, mes, d);
+        dataDia.setHours(0, 0, 0, 0);
+
+        const ehPassado = dataDia < hoje;
+        const ehHoje = dataDia.getTime() === hoje.getTime();
+        const ehSelecionado = dataDia.getTime() === dataSelecionada.getTime();
 
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.onclick = () => {
-          diaSelecionado = d.rotuloCompleto;
-          document.getElementById('selectedDayLabel').innerText = d.rotuloCurto;
-          renderizarCalendario();
-        };
 
-        btn.className = `flex-shrink-0 flex flex-col items-center justify-center w-16 py-2.5 rounded-2xl border transition active:scale-95 ${
-          isSelected 
-            ? 'bg-espresso text-white border-espresso shadow-md' 
-            : 'bg-white text-neutral-700 border-neutral-200/90 hover:border-neutral-300'
-        }`;
+        if (ehPassado) {
+          btn.disabled = true;
+          btn.className = 'h-10 w-full flex items-center justify-center text-xs text-neutral-300 font-medium cursor-not-allowed select-none';
+          btn.innerText = d;
+        } else {
+          btn.onclick = () => selecionarData(ano, mes, d);
+          btn.className = `h-10 w-full flex flex-col items-center justify-center rounded-xl transition text-xs font-semibold cursor-pointer active:scale-95 relative ${
+            ehSelecionado
+              ? 'bg-espresso text-white font-bold shadow-md scale-105 z-10'
+              : 'text-neutral-800 hover:bg-rosesoft hover:text-roseaccent border border-transparent hover:border-roseborder'
+          }`;
 
-        btn.innerHTML = `
-          <span class="text-[10px] uppercase font-bold ${isSelected ? 'text-neutral-300' : 'text-neutral-400'}">${d.dSemana}</span>
-          <span class="font-serif font-bold text-base my-0.5">${d.dMes}</span>
-          <span class="text-[9px] font-semibold ${isSelected ? 'text-amber-300' : 'text-neutral-500'}">${d.rotuloCurto === 'Hoje' ? 'Hoje' : d.mesNome}</span>
-        `;
+          btn.innerHTML = `
+            <span>${d}</span>
+            ${ehHoje ? `<span class="w-1.5 h-1.5 rounded-full ${ehSelecionado ? 'bg-amber-300' : 'bg-roseaccent'} absolute bottom-1"></span>` : ''}
+          `;
+        }
 
-        track.appendChild(btn);
-      });
+        grid.appendChild(btn);
+      }
 
-      document.getElementById('selectedDayLabel').innerText = diaSelecionado;
+      // Atualiza o texto da data selecionada
+      const dSemana = diasSemanaNomes[dataSelecionada.getDay()];
+      const dNumero = dataSelecionada.getDate();
+      const mesTexto = mesesNomes[dataSelecionada.getMonth()];
+
+      let rotuloFormatado = `${dSemana}, ${dNumero} de ${mesTexto}`;
+      if (dataSelecionada.getTime() === hoje.getTime()) {
+        rotuloFormatado = `Hoje (${dSemana}, ${dNumero} de ${mesTexto})`;
+      }
+
+      diaSelecionadoTexto = rotuloFormatado;
+      document.getElementById('selectedDayLabel').innerText = rotuloFormatado;
     }
 
     function renderizarHorarios() {
@@ -525,7 +598,7 @@
       const phone = (studioData.phone || '').replace(/\D/g, '');
       const cleanPhone = phone.startsWith('55') ? phone : `55${phone}`;
 
-      let msg = `Olá *${studioData.name}*! 👋%0A%0AGostaria de solicitar um agendamento:%0A%0A💅 *Procedimento(s):*%0A${listaTexto}%0A💰 *Total:* R$ ${totalFormatado}%0A📅 *Data:* ${diaSelecionado} às ${horarioSelecionado}%0A👤 *Meu Nome:* ${nomeCliente}`;
+      let msg = `Olá *${studioData.name}*! 👋%0A%0AGostaria de solicitar um agendamento:%0A%0A💅 *Procedimento(s):*%0A${listaTexto}%0A💰 *Total:* R$ ${totalFormatado}%0A📅 *Data:* ${diaSelecionadoTexto} às ${horarioSelecionado}%0A👤 *Meu Nome:* ${nomeCliente}`;
 
       if (obs) {
         msg += `%0A📝 *Observação:* ${encodeURIComponent(obs)}`;
